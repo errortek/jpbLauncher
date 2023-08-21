@@ -13,15 +13,18 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<ripple xmlns:android="http://schemas.android.com/apk/res/android"
-    android:color="?android:attr/colorControlHighlight">
-    <item android:id="@android:id/mask">
-        <shape android:shape="rectangle">
-            <solid android:color="#FFFFFFFF"/>
-            <corners android:bottomLeftRadius="@dimen/dialogCornerRadius"
-                android:bottomRightRadius="@dimen/dialogCornerRadius"
-                android:topLeftRadius="0dp"
-                android:topRightRadius="0dp"/>
-        </shape>
-    </item>
-</ripple>
+
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="52dp"
+    android:height="52dp"
+    android:viewportHeight="52"
+    android:viewportWidth="52">
+    <group>
+        <path
+            android:fillColor="@color/taskbar_divider_background"
+            android:pathData="M26,11L26,41"
+            android:strokeColor="@color/taskbar_divider_background"
+            android:strokeLineCap="round"
+            android:strokeWidth="2" />
+    </group>
+</vector>
