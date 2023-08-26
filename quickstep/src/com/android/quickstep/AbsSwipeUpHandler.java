@@ -193,6 +193,7 @@ public abstract class AbsSwipeUpHandler<T extends StatefulActivity<S>,
                     ActiveGestureLog.INSTANCE.addLog("Launcher destroyed", LAUNCHER_DESTROYED);
                     mRecentsView = null;
                     mActivity = null;
+                    mStateCallback.clearState(STATE_LAUNCHER_PRESENT);
                 }
             };
 
@@ -517,20 +518,22 @@ public abstract class AbsSwipeUpHandler<T extends StatefulActivity<S>,
         // Set up a entire animation lifecycle callback to notify the current recents view when
         // the animation is canceled
         mGestureState.runOnceAtState(STATE_RECENTS_ANIMATION_CANCELED, () -> {
-                HashMap<Integer, ThumbnailData> snapshots =
-                        mGestureState.consumeRecentsAnimationCanceledSnapshot();
-                if (snapshots != null) {
-                    mRecentsView.switchToScreenshot(snapshots, () -> {
-                        if (mRecentsAnimationController != null) {
-                            mRecentsAnimationController.cleanupScreenshot();
-                        } else if (mDeferredCleanupRecentsAnimationController != null) {
-                            mDeferredCleanupRecentsAnimationController.cleanupScreenshot();
-                            mDeferredCleanupRecentsAnimationController = null;
-                        }
-                    });
-                    mRecentsView.onRecentsAnimationComplete();
-                }
-            });
+            if (mRecentsView == null) return;
+
+            HashMap<Integer, ThumbnailData> snapshots =
+                    mGestureState.consumeRecentsAnimationCanceledSnapshot();
+            if (snapshots != null) {
+                mRecentsView.switchToScreenshot(snapshots, () -> {
+                    if (mRecentsAnimationController != null) {
+                        mRecentsAnimationController.cleanupScreenshot();
+                    } else if (mDeferredCleanupRecentsAnimationController != null) {
+                        mDeferredCleanupRecentsAnimationController.cleanupScreenshot();
+                        mDeferredCleanupRecentsAnimationController = null;
+                    }
+                });
+                mRecentsView.onRecentsAnimationComplete();
+            }
+        });
 
         setupRecentsViewUi();
         mRecentsView.runOnPageScrollsInitialized(this::linkRecentsViewScroll);

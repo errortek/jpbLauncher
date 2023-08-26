@@ -198,6 +198,8 @@ import com.android.launcher3.touch.ItemLongClickListener;
 import com.android.launcher3.uioverrides.plugins.PluginManagerWrapper;
 import com.android.launcher3.util.ActivityResultInfo;
 import com.android.launcher3.util.ActivityTracker;
+import com.android.launcher3.util.CannedAnimationCoordinator;
+import com.android.launcher3.util.BackPressHandler;
 import com.android.launcher3.util.ComponentKey;
 import com.android.launcher3.util.IntArray;
 import com.android.launcher3.util.IntSet;
@@ -421,6 +423,11 @@ public class Launcher extends StatefulActivity<LauncherState>
     private StartupLatencyLogger mStartupLatencyLogger;
     private CellPosMapper mCellPosMapper = CellPosMapper.DEFAULT;
 
+    private final CannedAnimationCoordinator mAnimationCoordinator =
+            new CannedAnimationCoordinator(this);
+
+    private final List<BackPressHandler> mBackPressedHandlers = new ArrayList<>();
+
     @Override
     @TargetApi(Build.VERSION_CODES.S)
     protected void onCreate(Bundle savedInstanceState) {
@@ -600,6 +607,7 @@ public class Launcher extends StatefulActivity<LauncherState>
      *  <li> auto cancel action mode handler
      *  <li> drag handler
      *  <li> view handler
+     *  <li> registered {@link BackPressHandler}
      *  <li> state handler
      * </ol>
      *
@@ -629,7 +637,14 @@ public class Launcher extends StatefulActivity<LauncherState>
             return topView;
         }
 
-        // #4 state handler
+        // #4 Custom back handlers
+        for (BackPressHandler handler : mBackPressedHandlers) {
+            if (handler.canHandleBack()) {
+                return handler;
+            }
+        }
+
+        // #5 state handler
         return new OnBackAnimationCallback() {
             @Override
             public void onBackInvoked() {
@@ -2343,13 +2358,37 @@ public class Launcher extends StatefulActivity<LauncherState>
         mWorkspace.unlockWallpaperFromDefaultPageOnNextLayout();
     }
 
+    /**
+     * Remove odd number because they are already included when isTwoPanels and add the pair screen
+     * if not present.
+     */
+    private IntArray filterTwoPanelScreenIds(IntArray orderedScreenIds) {
+        IntSet screenIds = IntSet.wrap(orderedScreenIds);
+        orderedScreenIds.forEach(screenId -> {
+            if (screenId % 2 == 1) {
+                screenIds.remove(screenId);
+                // In case the pair is not added, add it
+                if (!mWorkspace.containsScreenId(screenId - 1)) {
+                    screenIds.add(screenId - 1);
+                }
+            }
+        });
+        return screenIds.getArray();
+    }
+
     private void bindAddScreens(IntArray orderedScreenIds) {
+
         if (mDeviceProfile.isTwoPanels) {
-            // Some empty pages might have been removed while the phone was in a single panel
-            // mode, so we want to add those empty pages back.
-            IntSet screenIds = IntSet.wrap(orderedScreenIds);
-            orderedScreenIds.forEach(screenId -> screenIds.add(mWorkspace.getScreenPair(screenId)));
-            orderedScreenIds = screenIds.getArray();
+            if (FOLDABLE_SINGLE_PAGE.get()) {
+                orderedScreenIds = filterTwoPanelScreenIds(orderedScreenIds);
+            } else {
+                // Some empty pages might have been removed while the phone was in a single panel
+                // mode, so we want to add those empty pages back.
+                IntSet screenIds = IntSet.wrap(orderedScreenIds);
+                orderedScreenIds.forEach(
+                        screenId -> screenIds.add(mWorkspace.getScreenPair(screenId)));
+                orderedScreenIds = screenIds.getArray();
+            }
         }
 
         int count = orderedScreenIds.size();
@@ -3253,6 +3292,14 @@ public class Launcher extends StatefulActivity<LauncherState>
         updateDisallowBack();
     }
 
+    protected void addBackAnimationCallback(BackPressHandler callback) {
+        mBackPressedHandlers.add(callback);
+    }
+
+    protected void removeBackAnimationCallback(BackPressHandler callback) {
+        mBackPressedHandlers.remove(callback);
+    }
+
     private void updateDisallowBack() {
         if (DESKTOP_MODE_1_SUPPORTED || DESKTOP_MODE_2_SUPPORTED) {
             // Do not disable back in launcher when prototype behavior is enabled
@@ -3260,10 +3307,18 @@ public class Launcher extends StatefulActivity<LauncherState>
         }
         LauncherRootView rv = getRootView();
         if (rv != null) {
+            boolean isSplitSelectionEnabled = isSplitSelectionEnabled();
             boolean disableBack = getStateManager().getState() == NORMAL
-                    && AbstractFloatingView.getTopOpenView(this) == null;
+                    && AbstractFloatingView.getTopOpenView(this) == null
+                    && !isSplitSelectionEnabled;
             rv.setDisallowBackGesture(disableBack);
         }
+    }
+
+    /** To be overridden by subclasses */
+    protected boolean isSplitSelectionEnabled() {
+        // Overridden
+        return false;
     }
 
     @Override
@@ -3397,5 +3452,12 @@ public class Launcher extends StatefulActivity<LauncherState>
      */
     public void launchAppPair(WorkspaceItemInfo app1, WorkspaceItemInfo app2) {
         // Overridden
+    }
+
+    /**
+     * Returns the animation coordinator for playing one-off animations
+     */
+    public CannedAnimationCoordinator getAnimationCoordinator() {
+        return mAnimationCoordinator;
     }
 }

@@ -230,6 +230,7 @@ public final class FeatureFlags {
     public static final BooleanFlag ENABLE_HIDE_HEADER = getReleaseFlag(270390930,
             "ENABLE_HIDE_HEADER", ENABLED, "Hide header on keyboard before typing in all apps");
 
+    // Aconfig migration complete for ENABLE_EXPANDING_PAUSE_WORK_BUTTON.
     public static final BooleanFlag ENABLE_EXPANDING_PAUSE_WORK_BUTTON = getDebugFlag(270390779,
             "ENABLE_EXPANDING_PAUSE_WORK_BUTTON", DISABLED,
             "Expand and collapse pause work button while scrolling");
@@ -238,7 +239,7 @@ public final class FeatureFlags {
             "COLLECT_SEARCH_HISTORY", DISABLED, "Allow launcher to collect search history for log");
 
     public static final BooleanFlag ENABLE_TWOLINE_ALLAPPS = getDebugFlag(270390937,
-            "ENABLE_TWOLINE_ALLAPPS", ENABLED, "Enables two line label inside all apps.");
+            "ENABLE_TWOLINE_ALLAPPS", DISABLED, "Enables two line label inside all apps.");
 
     public static final BooleanFlag IME_STICKY_SNACKBAR_EDU = getDebugFlag(270391693,
             "IME_STICKY_SNACKBAR_EDU", ENABLED, "Show sticky IME edu in AllApps");
@@ -297,11 +298,6 @@ public final class FeatureFlags {
             "ENABLE_APP_ICON_IN_INLINE_SHORTCUTS", DISABLED, "Show app icon for inline shortcut");
 
     // TODO(Block 22): Clean up flags
-    public static final BooleanFlag RECEIVE_UNFOLD_EVENTS_FROM_SYSUI = getDebugFlag(270397209,
-            "RECEIVE_UNFOLD_EVENTS_FROM_SYSUI", ENABLED,
-            "Enables receiving unfold animation events from sysui instead of calculating "
-                    + "them in launcher process using hinge sensor values.");
-
     public static final BooleanFlag ENABLE_WIDGET_TRANSITION_FOR_RESIZING = getDebugFlag(268553314,
             "ENABLE_WIDGET_TRANSITION_FOR_RESIZING", DISABLED,
             "Enable widget transition animation when resizing the widgets");
@@ -414,12 +410,12 @@ public final class FeatureFlags {
 
     // TODO(Block 33): Clean up flags
     public static final BooleanFlag ENABLE_ALL_APPS_RV_PREINFLATION = getDebugFlag(288161355,
-            "ENABLE_ALL_APPS_RV_PREINFLATION", DISABLED,
+            "ENABLE_ALL_APPS_RV_PREINFLATION", ENABLED,
             "Enables preinflating all apps icons to avoid scrolling jank.");
 
     // TODO(Block 34): Clean up flags
     public static final BooleanFlag ALL_APPS_GONE_VISIBILITY = getDebugFlag(291651514,
-            "ALL_APPS_GONE_VISIBILITY", DISABLED,
+            "ALL_APPS_GONE_VISIBILITY", ENABLED,
             "Set all apps container view's hidden visibility to GONE instead of INVISIBLE.");
 
     // TODO(Block 35): Empty block
