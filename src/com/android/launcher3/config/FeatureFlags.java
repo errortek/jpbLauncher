@@ -141,7 +141,7 @@ public final class FeatureFlags {
 
     // TODO(Block 6): Clean up flags
     public static final BooleanFlag ENABLE_ALL_APPS_SEARCH_IN_TASKBAR = getDebugFlag(270393900,
-            "ENABLE_ALL_APPS_SEARCH_IN_TASKBAR", DISABLED,
+            "ENABLE_ALL_APPS_SEARCH_IN_TASKBAR", TEAMFOOD,
             "Enables Search box in Taskbar All Apps.");
 
     public static final BooleanFlag SECONDARY_DRAG_N_DROP_TO_PIN = getDebugFlag(270395140,
@@ -174,6 +174,9 @@ public final class FeatureFlags {
     public static final BooleanFlag MULTI_SELECT_EDIT_MODE = getDebugFlag(270709220,
             "MULTI_SELECT_EDIT_MODE", DISABLED, "Enable new multi-select edit mode "
                     + "for home screen");
+
+    public static final BooleanFlag SMARTSPACE_AS_A_WIDGET = getDebugFlag(299181941,
+            "SMARTSPACE_AS_A_WIDGET", DISABLED, "Enable SmartSpace as a widget");
 
     // TODO(Block 10): Clean up flags
     public static final BooleanFlag ENABLE_BACK_SWIPE_LAUNCHER_ANIMATION = getDebugFlag(270614790,
@@ -212,6 +215,10 @@ public final class FeatureFlags {
 
     public static final BooleanFlag ENABLE_TRANSIENT_TASKBAR = getDebugFlag(270395798,
             "ENABLE_TRANSIENT_TASKBAR", ENABLED, "Enables transient taskbar.");
+
+    public static final BooleanFlag ENABLE_TASKBAR_NO_RECREATION = getDebugFlag(299193589,
+            "ENABLE_TASKBAR_NO_RECREATION", DISABLED,
+            "Enables taskbar with no recreation from lifecycle changes of TaskbarActivityContext.");
 
     // TODO(Block 16): Clean up flags
     // When enabled the promise icon is visible in all apps while installation an app.
@@ -261,7 +268,7 @@ public final class FeatureFlags {
 
     // TODO(Block 17): Clean up flags
     public static final BooleanFlag ENABLE_TASKBAR_PINNING = getDebugFlag(270396583,
-            "ENABLE_TASKBAR_PINNING", DISABLED,
+            "ENABLE_TASKBAR_PINNING", TEAMFOOD,
             "Enables taskbar pinning to allow user to switch between transient and persistent "
                     + "taskbar flavors");
 

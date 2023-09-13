@@ -27,6 +27,7 @@ import static com.android.launcher3.AbstractFloatingView.TYPE_ALL;
 import static com.android.launcher3.AbstractFloatingView.TYPE_REBIND_SAFE;
 import static com.android.launcher3.AbstractFloatingView.TYPE_TASKBAR_OVERLAY_PROXY;
 import static com.android.launcher3.Utilities.isRunningInTestHarness;
+import static com.android.launcher3.config.FeatureFlags.ENABLE_TASKBAR_NO_RECREATION;
 import static com.android.launcher3.logging.StatsLogManager.LauncherEvent.LAUNCHER_FOLDER_OPEN;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_DRAGGING;
 import static com.android.launcher3.taskbar.TaskbarAutohideSuspendController.FLAG_AUTOHIDE_SUSPEND_FULLSCREEN;
@@ -58,6 +59,7 @@ import android.view.Gravity;
 import android.view.RoundedCorner;
 import android.view.Surface;
 import android.view.View;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -325,11 +327,11 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mIsDestroyed = false;
         }
 
-        if (!mAddedWindow) {
+        if (!ENABLE_TASKBAR_NO_RECREATION.get() && !mAddedWindow) {
             mWindowManager.addView(mDragLayer, mWindowLayoutParams);
             mAddedWindow = true;
         } else {
-            mWindowManager.updateViewLayout(mDragLayer, mWindowLayoutParams);
+            notifyUpdateLayoutParams();
         }
     }
 
@@ -676,7 +678,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         mIsDestroyed = true;
         setUIController(TaskbarUIController.DEFAULT);
         mControllers.onDestroy();
-        if (!FLAG_HIDE_NAVBAR_WINDOW) {
+        if (!ENABLE_TASKBAR_NO_RECREATION.get() && !FLAG_HIDE_NAVBAR_WINDOW) {
             mWindowManager.removeViewImmediate(mDragLayer);
             mAddedWindow = false;
         }
@@ -808,7 +810,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         }
         mWindowLayoutParams.height = height;
         mControllers.taskbarInsetsController.onTaskbarOrBubblebarWindowHeightOrInsetsChanged();
-        mWindowManager.updateViewLayout(mDragLayer, mWindowLayoutParams);
+        notifyUpdateLayoutParams();
     }
 
     /**
@@ -851,7 +853,22 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
         } else {
             mWindowLayoutParams.flags |= FLAG_NOT_FOCUSABLE;
         }
-        mWindowManager.updateViewLayout(mDragLayer, mWindowLayoutParams);
+        notifyUpdateLayoutParams();
+    }
+
+    /**
+     * Applies forcibly show flag to taskbar window iff transient taskbar is unstashed.
+     */
+    public void applyForciblyShownFlagWhileTransientTaskbarUnstashed(boolean shouldForceShow) {
+        if (!DisplayController.isTransientTaskbar(this)) {
+            return;
+        }
+        if (shouldForceShow) {
+            mWindowLayoutParams.forciblyShownTypes |= WindowInsets.Type.navigationBars();
+        } else {
+            mWindowLayoutParams.forciblyShownTypes &= ~WindowInsets.Type.navigationBars();
+        }
+        notifyUpdateLayoutParams();
     }
 
     /**
@@ -960,8 +977,8 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         }
 
                     } catch (NullPointerException
-                            | ActivityNotFoundException
-                            | SecurityException e) {
+                             | ActivityNotFoundException
+                             | SecurityException e) {
                         Toast.makeText(this, R.string.activity_not_found, Toast.LENGTH_SHORT)
                                 .show();
                         Log.e(TAG, "Unable to launch. tag=" + info + " intent=" + intent, e);
@@ -1055,6 +1072,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
 
     /**
      * Called when we detect a long press in the nav region before passing the gesture slop.
+     *
      * @return Whether taskbar handled the long press, and thus should cancel the gesture.
      */
     public boolean onLongPressToUnstashTaskbar() {
@@ -1124,7 +1142,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * Called when we detect a motion down or up/cancel in the nav region while stashed.
      *
      * @param animateForward Whether to animate towards the unstashed hint state or back to stashed.
-     * @param forceUnstash Whether we force the unstash hint.
+     * @param forceUnstash   Whether we force the unstash hint.
      */
     public void startTaskbarUnstashHint(boolean animateForward, boolean forceUnstash) {
         // TODO(b/270395798): Clean up forceUnstash after removing long-press unstashing code.
@@ -1232,12 +1250,16 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             mWindowLayoutParams.privateFlags &=
                     ~WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION;
         }
-        mWindowManager.updateViewLayout(mDragLayer, mWindowLayoutParams);
+        notifyUpdateLayoutParams();
     }
 
     void notifyUpdateLayoutParams() {
         if (mDragLayer.isAttachedToWindow()) {
-            mWindowManager.updateViewLayout(mDragLayer, mWindowLayoutParams);
+            if (ENABLE_TASKBAR_NO_RECREATION.get()) {
+                mWindowManager.updateViewLayout(mDragLayer.getRootView(), mWindowLayoutParams);
+            } else {
+                mWindowManager.updateViewLayout(mDragLayer, mWindowLayoutParams);
+            }
         }
     }
 
