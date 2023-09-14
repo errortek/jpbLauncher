@@ -40,6 +40,7 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.SparseArray;
 import android.view.Surface;
 
@@ -362,6 +363,12 @@ public class DeviceProfile {
             } else {
                 mTypeIndex = INDEX_DEFAULT;
             }
+        }
+        if (InvariantDeviceProfile.sDebug) {
+            Log.d("b/298077774",
+                    "DeviceProfile - mTypeIndex: " + mTypeIndex + ": " + dpPointFToString(
+                            "minCellSize",
+                            inv.minCellSize[mTypeIndex]));
         }
 
         isTransientTaskbar = DisplayController.isTransientTaskbar(context);
@@ -1715,7 +1722,7 @@ public class DeviceProfile {
 
     /** Gets the space that the overview actions will take, including bottom margin. */
     public int getOverviewActionsClaimedSpace() {
-        int overviewActionsSpace = isTablet && FeatureFlags.ENABLE_GRID_ONLY_OVERVIEW.get()
+        int overviewActionsSpace = isTablet && FeatureFlags.enableGridOnlyOverview()
                 ? 0
                 : (overviewActionsTopMarginPx + overviewActionsHeight);
         return overviewActionsSpace + getOverviewActionsClaimedSpaceBelow();
