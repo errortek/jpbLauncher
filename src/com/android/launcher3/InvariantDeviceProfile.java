@@ -18,7 +18,6 @@ package com.android.launcher3;
 
 import static com.android.launcher3.LauncherPrefs.GRID_NAME;
 import static com.android.launcher3.Utilities.dpiFromPx;
-import static com.android.launcher3.config.FeatureFlags.ENABLE_TWO_PANEL_HOME;
 import static com.android.launcher3.testing.shared.ResourceUtils.INVALID_RESOURCE_HANDLE;
 import static com.android.launcher3.util.DisplayController.CHANGE_DENSITY;
 import static com.android.launcher3.util.DisplayController.CHANGE_NAVIGATION_MODE;
@@ -72,7 +71,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class InvariantDeviceProfile {
@@ -81,9 +79,6 @@ public class InvariantDeviceProfile {
     // We do not need any synchronization for this variable as its only written on UI thread.
     public static final MainThreadInitializedObject<InvariantDeviceProfile> INSTANCE =
             new MainThreadInitializedObject<>(InvariantDeviceProfile::new);
-
-    @VisibleForTesting
-    public static boolean sDebug = false;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({TYPE_PHONE, TYPE_MULTI_DISPLAY, TYPE_TABLET})
@@ -320,7 +315,7 @@ public class InvariantDeviceProfile {
         int type = displayInfo.supportedBounds.stream()
                 .mapToInt(bounds -> displayInfo.isTablet(bounds) ? flagTablet : flagPhone)
                 .reduce(0, (a, b) -> a | b);
-        if ((type == (flagPhone | flagTablet)) && ENABLE_TWO_PANEL_HOME.get()) {
+        if (type == (flagPhone | flagTablet)) {
             // device has profiles supporting both phone and table modes
             return TYPE_MULTI_DISPLAY;
         } else if (type == flagTablet) {
@@ -687,29 +682,10 @@ public class InvariantDeviceProfile {
         for (int i = 0; i < points.size() && i < KNEARESTNEIGHBOR; ++i) {
             DisplayOption p = points.get(i);
             float w = weight(width, height, p.minWidthDps, p.minHeightDps, WEIGHT_POWER);
-            if (sDebug) {
-                for (int j = INDEX_DEFAULT; j < COUNT_SIZES; j++) {
-                    Log.d("b/298077774",
-                            "invDistWeightedInterpolate - points[" + i + "]: " + String.format(
-                                    Locale.ENGLISH, "\t%s: PointF(%.1f, %.1f)dp",
-                                    "minCellSize[" + j + "]",
-                                    p.minCellSize[j].x, p.minCellSize[j].y));
-                }
-                Log.d("b/298077774", "invDistWeightedInterpolate - w[" + i + "]: " + w);
-            }
             weights += w;
             out.add(new DisplayOption().add(p).multiply(w));
         }
         out.multiply(1.0f / weights);
-        if (sDebug) {
-            Log.d("b/298077774", "invDistWeightedInterpolate - weights: " + weights);
-            for (int j = INDEX_DEFAULT; j < COUNT_SIZES; j++) {
-                Log.d("b/298077774",
-                        "invDistWeightedInterpolate - out: " + String.format(Locale.ENGLISH,
-                                "\t%s: PointF(%.1f, %.1f)dp", "minCellSize[" + j + "]",
-                                out.minCellSize[j].x, out.minCellSize[j].y));
-            }
-        }
 
         // Since the bitmaps are persisted, ensure that all bitmap sizes are not larger than
         // predefined size to avoid cache invalidation
