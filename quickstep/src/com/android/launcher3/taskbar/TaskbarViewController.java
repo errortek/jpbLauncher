@@ -581,6 +581,11 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
      *                       1 => fully aligned
      */
     public void setLauncherIconAlignment(float alignmentRatio, DeviceProfile launcherDp) {
+        if (isPhoneMode(launcherDp)) {
+            mIconAlignControllerLazy = null;
+            return;
+        }
+
         boolean isHotseatIconOnTopWhenAligned =
                 mControllers.uiController.isHotseatIconOnTopWhenAligned();
         boolean isStashed = mControllers.taskbarStashController.isStashed();
@@ -609,11 +614,6 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
      */
     private AnimatorPlaybackController createIconAlignmentController(DeviceProfile launcherDp) {
         PendingAnimation setter = new PendingAnimation(100);
-        if (TaskbarManager.isPhoneMode(launcherDp)) {
-            // No animation for icons in small-screen
-            return setter.createPlaybackController();
-        }
-
         mOnControllerPreCreateCallback.run();
         DeviceProfile taskbarDp = mActivity.getDeviceProfile();
         Rect hotseatPadding = launcherDp.getHotseatLayoutPadding(mActivity);
@@ -714,13 +714,19 @@ public class TaskbarViewController implements TaskbarControllers.LoggableTaskbar
                 continue;
             }
 
-            int positionInHotseat;
-            if (isAllAppsButton || isTaskbarDividerView) {
-                // Note that there is no All Apps button or taskbar divider view in the hotseat,
+            float positionInHotseat;
+            if (isAllAppsButton) {
+                // Note that there is no All Apps button in the hotseat,
                 // this position is only used as its convenient for animation purposes.
                 positionInHotseat = Utilities.isRtl(child.getResources())
                         ? taskbarDp.numShownHotseatIcons
                         : -1;
+            }  else if (isTaskbarDividerView) {
+                // Note that there is no taskbar divider view in the hotseat,
+                // this position is only used as its convenient for animation purposes.
+                positionInHotseat = Utilities.isRtl(child.getResources())
+                        ? taskbarDp.numShownHotseatIcons - 0.5f
+                        : -0.5f;
             } else if (child.getTag() instanceof ItemInfo) {
                 positionInHotseat = ((ItemInfo) child.getTag()).screenId;
             } else {
