@@ -987,15 +987,20 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
             FolderIcon folderIcon = (FolderIcon) view;
             Folder folder = folderIcon.getFolder();
 
-            folder.setOnFolderStateChangedListener(newState -> {
-                if (newState == Folder.STATE_OPEN) {
-                    setTaskbarWindowFocusableForIme(true);
-                } else if (newState == Folder.STATE_CLOSED) {
-                    // Defer by a frame to ensure we're no longer fullscreen and thus won't jump.
-                    getDragLayer().post(() -> setTaskbarWindowFocusableForIme(false));
-                    folder.setOnFolderStateChangedListener(null);
-                }
-            });
+            folder.setPriorityOnFolderStateChangedListener(
+                    new Folder.OnFolderStateChangedListener() {
+                        @Override
+                        public void onFolderStateChanged(int newState) {
+                            if (newState == Folder.STATE_OPEN) {
+                                setTaskbarWindowFocusableForIme(true);
+                            } else if (newState == Folder.STATE_CLOSED) {
+                                // Defer by a frame to ensure we're no longer fullscreen and thus
+                                // won't jump.
+                                getDragLayer().post(() -> setTaskbarWindowFocusableForIme(false));
+                                folder.setPriorityOnFolderStateChangedListener(null);
+                            }
+                        }
+                    });
 
             setTaskbarWindowFullscreen(true);
 
@@ -1055,7 +1060,21 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
                         Log.e(TAG, "Unable to launch. tag=" + info + " intent=" + intent, e);
                         return;
                     }
+                }
 
+                // If the app was launched from a folder, stash the taskbar after it closes
+                Folder f = Folder.getOpen(this);
+                if (f != null && f.getInfo().id == info.container) {
+                    f.addOnFolderStateChangedListener(new Folder.OnFolderStateChangedListener() {
+                        @Override
+                        public void onFolderStateChanged(int newState) {
+                            if (newState == Folder.STATE_CLOSED) {
+                                f.removeOnFolderStateChangedListener(this);
+                                mControllers.taskbarStashController
+                                        .updateAndAnimateTransientTaskbar(true);
+                            }
+                        }
+                    });
                 }
                 mControllers.uiController.onTaskbarIconLaunched(info);
                 mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(true);
@@ -1142,15 +1161,6 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     /**
-     * Called when we detect a long press in the nav region before passing the gesture slop.
-     *
-     * @return Whether taskbar handled the long press, and thus should cancel the gesture.
-     */
-    public boolean onLongPressToUnstashTaskbar() {
-        return mControllers.taskbarStashController.onLongPressToUnstashTaskbar();
-    }
-
-    /**
      * Called when we want to unstash taskbar when user performs swipes up gesture.
      */
     public void onSwipeToUnstashTaskbar() {
@@ -1205,28 +1215,7 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
      * @param animateForward Whether to animate towards the unstashed hint state or back to stashed.
      */
     public void startTaskbarUnstashHint(boolean animateForward) {
-        // TODO(b/270395798): Clean up forceUnstash after removing long-press unstashing code.
-        startTaskbarUnstashHint(animateForward, /* forceUnstash = */ false);
-    }
-
-    /**
-     * Called when we detect a motion down or up/cancel in the nav region while stashed.
-     *
-     * @param animateForward Whether to animate towards the unstashed hint state or back to stashed.
-     * @param forceUnstash   Whether we force the unstash hint.
-     */
-    public void startTaskbarUnstashHint(boolean animateForward, boolean forceUnstash) {
-        // TODO(b/270395798): Clean up forceUnstash after removing long-press unstashing code.
-        mControllers.taskbarStashController.startUnstashHint(animateForward, forceUnstash);
-    }
-
-    /**
-     * Enables manual taskbar stashing. This method should only be used for tests that need to
-     * stash/unstash the taskbar.
-     */
-    @VisibleForTesting
-    public void enableManualStashingDuringTests(boolean enableManualStashing) {
-        mControllers.taskbarStashController.enableManualStashingDuringTests(enableManualStashing);
+        mControllers.taskbarStashController.startUnstashHint(animateForward);
     }
 
     /**
@@ -1239,15 +1228,12 @@ public class TaskbarActivityContext extends BaseTaskbarContext {
     }
 
     /**
-     * Unstashes the Taskbar if it is stashed. This method should only be used to unstash the
-     * taskbar at the end of a test.
+     * Unstashes the Taskbar if it is stashed.
      */
     @VisibleForTesting
     public void unstashTaskbarIfStashed() {
         if (DisplayController.isTransientTaskbar(this)) {
             mControllers.taskbarStashController.updateAndAnimateTransientTaskbar(false);
-        } else {
-            mControllers.taskbarStashController.onLongPressToUnstashTaskbar();
         }
     }
 
