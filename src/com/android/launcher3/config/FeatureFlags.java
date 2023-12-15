@@ -201,10 +201,6 @@ public final class FeatureFlags {
             "ENABLE_PARAMETRIZE_REORDER", DISABLED,
             "Enables generating the reorder using a set of parameters");
 
-    public static final BooleanFlag ENABLE_NO_LONG_PRESS_DRAG = getDebugFlag(299748096,
-            "ENABLE_NO_LONG_PRESS_DRAG", ENABLED,
-            "Don't trigger the drag if we are still under long press");
-
     // TODO(Block 12): Clean up flags
     public static final BooleanFlag ENABLE_MULTI_INSTANCE = getDebugFlag(270396680,
             "ENABLE_MULTI_INSTANCE", DISABLED,
@@ -308,7 +304,7 @@ public final class FeatureFlags {
                     "Long press of nav handle is instantly triggered if deep press is detected.");
 
     public static final IntFlag LPNH_HAPTIC_HINT_DELAY =
-            getIntFlag(309972570, "LPNH_HAPTIC_HINT_ITERATIONS", 0,
+            getIntFlag(309972570, "LPNH_HAPTIC_HINT_DELAY", 0,
                     "Delay before haptic hint starts.");
 
     // TODO(Block 17): Clean up flags
