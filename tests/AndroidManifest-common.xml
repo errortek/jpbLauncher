@@ -149,7 +149,8 @@
             android:name="com.android.launcher3.testcomponent.BaseTestingActivity"
             android:label="LauncherTestApp"
             android:exported="true"
-            android:taskAffinity="com.android.launcher3.testcomponent.Affinity1">
+            android:taskAffinity="com.android.launcher3.testcomponent.Affinity1"
+            android:theme="@style/Theme.TestActivities">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -341,6 +342,24 @@
             <intent-filter>
                 <action android:name="android.intent.action.WEB_SEARCH" />
                 <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name="AAAActivity"
+            android:label="AAA"
+            android:exported="true"
+            android:targetActivity="com.android.launcher3.testcomponent.BaseTestingActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity-alias>
+        <activity-alias android:name="ZZZActivity"
+            android:label="ZZZ"
+            android:exported="true"
+            android:targetActivity="com.android.launcher3.testcomponent.BaseTestingActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity-alias>
 
