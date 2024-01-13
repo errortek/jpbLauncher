@@ -167,8 +167,6 @@ public final class FeatureFlags {
             "Enable the ability to generate monochromatic icons, if it is not provided by the app");
 
     // TODO(Block 8): Clean up flags
-    public static final BooleanFlag ENABLE_LAUNCHER_BR_METRICS = getDebugFlag(305984208,
-            "ENABLE_LAUNCHER_BR_METRICS", TEAMFOOD, "Enable metrics for Launcher restore");
 
     // TODO(Block 9): Clean up flags
     public static final BooleanFlag MULTI_SELECT_EDIT_MODE = getDebugFlag(270709220,
@@ -225,7 +223,7 @@ public final class FeatureFlags {
                 // Task bar pinning and task bar nav bar unification are both dependent on
                 // ENABLE_TASKBAR_NO_RECREATION. We want to turn ENABLE_TASKBAR_NO_RECREATION on
                 // when either of the dependent features is turned on.
-                || ENABLE_TASKBAR_PINNING.get() || ENABLE_TASKBAR_NAVBAR_UNIFICATION;
+                || enableTaskbarPinning() || ENABLE_TASKBAR_NAVBAR_UNIFICATION;
     }
 
     // TODO(Block 16): Clean up flags

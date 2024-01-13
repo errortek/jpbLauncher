@@ -18,7 +18,7 @@ package com.android.launcher3.model;
 
 import static com.android.launcher3.BuildConfig.WIDGET_ON_FIRST_SCREEN;
 import static com.android.launcher3.Flags.enableSupportForArchiving;
-import static com.android.launcher3.Flags.enableLauncherBrMetrics;
+import static com.android.launcher3.Flags.enableLauncherBrMetricsFixed;
 import static com.android.launcher3.LauncherPrefs.IS_FIRST_LOAD_AFTER_RESTORE;
 import static com.android.launcher3.LauncherPrefs.SHOULD_SHOW_SMARTSPACE;
 import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APP_PAIR;
@@ -123,6 +123,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CancellationException;
 
@@ -185,7 +186,7 @@ public class LoaderTask implements Runnable {
         mLauncherBinder = launcherBinder;
         mLauncherApps = mApp.getContext().getSystemService(LauncherApps.class);
         mUserManager = mApp.getContext().getSystemService(UserManager.class);
-        mUserCache = UserCache.getInstance(mApp.getContext());
+        mUserCache = UserCache.INSTANCE.get(mApp.getContext());
         mSessionHelper = InstallSessionHelper.INSTANCE.get(mApp.getContext());
         mIconCache = mApp.getIconCache();
         mUserManagerState = userManagerState;
@@ -234,7 +235,7 @@ public class LoaderTask implements Runnable {
         mIsRestoreFromBackup =
                 (Boolean) LauncherPrefs.get(mApp.getContext()).get(IS_FIRST_LOAD_AFTER_RESTORE);
         LauncherRestoreEventLogger restoreEventLogger = null;
-        if (enableLauncherBrMetrics()) {
+        if (enableLauncherBrMetricsFixed()) {
             restoreEventLogger = LauncherRestoreEventLogger.Companion
                     .newInstance(mApp.getContext());
         }
@@ -247,7 +248,7 @@ public class LoaderTask implements Runnable {
             // sanitizeData should not be invoked if the workspace is loaded from a db different
             // from the main db as defined in the invariant device profile.
             // (e.g. both grid preview and minimal device mode uses a different db)
-            if (mApp.getInvariantDeviceProfile().dbFile.equals(mDbName)) {
+            if (Objects.equals(mApp.getInvariantDeviceProfile().dbFile, mDbName)) {
                 verifyNotStopped();
                 sanitizeFolders(mItemsDeleted);
                 sanitizeWidgetsShortcutsAndPackages();
