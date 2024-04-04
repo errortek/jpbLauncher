@@ -1062,6 +1062,8 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
             @Nullable DesktopRecentsTransitionController desktopRecentsTransitionController) {
         mActionsView = actionsView;
         mActionsView.updateHiddenFlags(HIDDEN_NO_TASKS, getTaskViewCount() == 0);
+        // Update flags for 1p/3p launchers
+        mActionsView.updateFor3pLauncher(!supportsAppPairs());
         mSplitSelectStateController = splitController;
         mDesktopRecentsTransitionController = desktopRecentsTransitionController;
     }
@@ -4020,10 +4022,6 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
         // Update flags to see if actions bar should show buttons for a single task or a pair of
         // tasks.
         mActionsView.updateForGroupedTask(isCurrentSplit);
-        // Update flags to see if actions bar should show buttons for tablets or phones.
-        mActionsView.updateForSmallScreen(!mActivity.getDeviceProfile().isTablet);
-        // Update flags for 1p/3p launchers
-        mActionsView.updateFor3pLauncher(!supportsAppPairs());
 
         if (isDesktopModeSupported()) {
             boolean isCurrentDesktop = getCurrentPageTaskView() instanceof DesktopTaskView;
@@ -4147,10 +4145,10 @@ public abstract class RecentsView<ACTIVITY_TYPE extends StatefulActivity<STATE_T
 
     private boolean snapToPageRelative(int delta, boolean cycle,
             @TaskGridNavHelper.TASK_NAV_DIRECTION int direction) {
-        // Ignore grid page snap events while scroll animations are running, otherwise the next
-        // page gets set before the animation finishes and can cause jumps.
+        // Set next page if scroll animation is still running, otherwise cannot snap to the
+        // next page on successive key presses. Setting the current page aborts the scroll.
         if (!mScroller.isFinished()) {
-            return true;
+            setCurrentPage(getNextPage());
         }
         int pageCount = getPageCount();
         if (pageCount == 0) {
