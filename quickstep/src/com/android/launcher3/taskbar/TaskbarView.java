@@ -354,8 +354,7 @@ public class TaskbarView extends FrameLayout implements FolderIcon.FolderIconPar
                             break;
                         case ITEM_TYPE_APP_PAIR:
                             hotseatView = AppPairIcon.inflateIcon(
-                                    expectedLayoutResId, mActivityContext, this, folderInfo,
-                                    BubbleTextView.DISPLAY_TASKBAR);
+                                    expectedLayoutResId, mActivityContext, this, folderInfo);
                             ((AppPairIcon) hotseatView).setTextVisible(false);
                             break;
                         default:

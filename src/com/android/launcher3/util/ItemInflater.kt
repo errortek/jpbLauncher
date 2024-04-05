@@ -81,8 +81,7 @@ class ItemInflater<T>(
                     R.layout.app_pair_icon,
                     context,
                     parent,
-                    item as FolderInfo,
-                    BubbleTextView.DISPLAY_WORKSPACE
+                    item as FolderInfo
                 )
             Favorites.ITEM_TYPE_APPWIDGET,
             Favorites.ITEM_TYPE_CUSTOM_APPWIDGET ->
