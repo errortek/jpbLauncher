@@ -659,8 +659,8 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
 
         // Create a new floating view in Launcher, positioned above the launching icon
         val drawableArea = launchingIconView.iconDrawableArea
-        val appIcon1 = launchingIconView.info.contents[0].newIcon(launchingIconView.context)
-        val appIcon2 = launchingIconView.info.contents[1].newIcon(launchingIconView.context)
+        val appIcon1 = launchingIconView.info.getFirstApp().newIcon(launchingIconView.context)
+        val appIcon2 = launchingIconView.info.getSecondApp().newIcon(launchingIconView.context)
         appIcon1.setBounds(0, 0, dp.iconSizePx, dp.iconSizePx)
         appIcon2.setBounds(0, 0, dp.iconSizePx, dp.iconSizePx)
         val floatingView =
@@ -671,6 +671,7 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
                 appIcon2,
                 dividerPos
             )
+        floatingView.bringToFront()
 
         // Launcher animation: animate the floating view, expanding to fill the display surface
         progressUpdater.addUpdateListener(

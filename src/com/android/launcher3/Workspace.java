@@ -17,7 +17,7 @@
 package com.android.launcher3;
 
 import static com.android.launcher3.LauncherAnimUtils.SPRING_LOADED_EXIT_DELAY;
-import static com.android.launcher3.LauncherSettings.Favorites.ITEM_TYPE_APPLICATION;
+import static com.android.launcher3.LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION;
 import static com.android.launcher3.LauncherState.ALL_APPS;
 import static com.android.launcher3.LauncherState.EDIT_MODE;
 import static com.android.launcher3.LauncherState.FLAG_MULTI_PAGE;
@@ -95,6 +95,7 @@ import com.android.launcher3.logger.LauncherAtom;
 import com.android.launcher3.logging.InstanceId;
 import com.android.launcher3.logging.StatsLogManager;
 import com.android.launcher3.logging.StatsLogManager.LauncherEvent;
+import com.android.launcher3.model.data.AppPairInfo;
 import com.android.launcher3.model.data.FolderInfo;
 import com.android.launcher3.model.data.ItemInfo;
 import com.android.launcher3.model.data.LauncherAppWidgetInfo;
@@ -1872,12 +1873,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
             return false;
         }
 
-        boolean aboveShortcut = (dropOverView.getTag() instanceof WorkspaceItemInfo
-                && ((WorkspaceItemInfo) dropOverView.getTag()).container
-                != LauncherSettings.Favorites.CONTAINER_HOTSEAT_PREDICTION);
-        boolean willBecomeShortcut =
-                (info.itemType == ITEM_TYPE_APPLICATION ||
-                        info.itemType == LauncherSettings.Favorites.ITEM_TYPE_DEEP_SHORTCUT);
+        boolean aboveShortcut = Folder.willAccept(dropOverView.getTag())
+                && ((ItemInfo) dropOverView.getTag()).container != CONTAINER_HOTSEAT_PREDICTION;
+        boolean willBecomeShortcut = Folder.willAcceptItemType(info.itemType);
 
         return (aboveShortcut && willBecomeShortcut);
     }
@@ -1924,12 +1922,12 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
         mCreateUserFolderOnDrop = false;
         final int screenId = getCellLayoutId(target);
 
-        boolean aboveShortcut = (v.getTag() instanceof WorkspaceItemInfo);
-        boolean willBecomeShortcut = (newView.getTag() instanceof WorkspaceItemInfo);
+        boolean aboveShortcut = Folder.willAccept(v.getTag());
+        boolean willBecomeShortcut = Folder.willAccept(newView.getTag());
 
         if (aboveShortcut && willBecomeShortcut) {
-            WorkspaceItemInfo sourceInfo = (WorkspaceItemInfo) newView.getTag();
-            WorkspaceItemInfo destInfo = (WorkspaceItemInfo) v.getTag();
+            ItemInfo sourceInfo = (ItemInfo) newView.getTag();
+            ItemInfo destInfo = (ItemInfo) v.getTag();
             // if the drag started here, we need to remove it from the workspace
             if (!external) {
                 getParentCellLayoutForView(mDragInfo.cell).removeView(mDragInfo.cell);
@@ -3313,7 +3311,7 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                     }
                 } else if (child instanceof FolderIcon) {
                     FolderInfo folderInfo = (FolderInfo) info;
-                    List<WorkspaceItemInfo> matches = folderInfo.contents.stream()
+                    List<ItemInfo> matches = folderInfo.getContents().stream()
                             .filter(matcher)
                             .collect(Collectors.toList());
                     if (!matches.isEmpty()) {
@@ -3321,6 +3319,11 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                         if (((FolderIcon) child).getFolder().isOpen()) {
                             ((FolderIcon) child).getFolder().close(false /* animate */);
                         }
+                    }
+                } else if (info instanceof AppPairInfo api) {
+                    // If an app pair's member apps are being removed, delete the whole app pair.
+                    if (api.anyMatch(matcher)) {
+                        mLauncher.removeItem(child, info, true);
                     }
                 }
             }
@@ -3373,9 +3376,9 @@ public class Workspace<T extends View & PageIndicator> extends PagedView<T>
                 }
             } else if (info instanceof FolderInfo && v instanceof FolderIcon) {
                 FolderInfo fi = (FolderInfo) info;
-                if (fi.contents.stream().anyMatch(matcher)) {
+                if (fi.anyMatch(matcher)) {
                     FolderDotInfo folderDotInfo = new FolderDotInfo();
-                    for (WorkspaceItemInfo si : fi.contents) {
+                    for (ItemInfo si : fi.getContents()) {
                         folderDotInfo.addDotInfo(mLauncher.getDotInfoForItem(si));
                     }
                     ((FolderIcon) v).setDotInfo(folderDotInfo);
