@@ -396,7 +396,7 @@
     <dimen name="transient_taskbar_clamped_offset_bound">0dp</dimen>
     <dimen name="taskbar_icon_spacing">0dp</dimen>
     <dimen name="taskbar_nav_buttons_size">0dp</dimen>
-    <dimen name="taskbar_contextual_button_margin">0dp</dimen>
+    <dimen name="taskbar_contextual_button_suw_margin">0dp</dimen>
     <dimen name="taskbar_hotseat_nav_spacing">0dp</dimen>
     <dimen name="taskbar_button_margin_default">0dp</dimen>
     <dimen name="taskbar_button_space_inbetween">0dp</dimen>
@@ -445,6 +445,8 @@
     <dimen name="split_instructions_bottom_margin_phone_landscape">24dp</dimen>
     <dimen name="split_instructions_bottom_margin_phone_portrait">60dp</dimen>
     <dimen name="split_instructions_start_margin_cancel">8dp</dimen>
+    <dimen name="split_divider_handle_region_width">96dp</dimen>
+    <dimen name="split_divider_handle_region_height">48dp</dimen>
 
     <dimen name="focus_outline_radius">16dp</dimen>
     <dimen name="focus_outline_stroke_width">3dp</dimen>

@@ -18,6 +18,7 @@ package com.android.launcher3.model.data
 
 import android.content.Context
 import com.android.launcher3.LauncherSettings
+import com.android.launcher3.R
 import com.android.launcher3.icons.IconCache
 import com.android.launcher3.logger.LauncherAtom
 import com.android.launcher3.views.ActivityContext
@@ -67,12 +68,41 @@ class AppPairInfo() : CollectionInfo() {
     /** Returns if either of the app pair members is currently disabled. */
     override fun isDisabled() = anyMatch { it.isDisabled }
 
-    /** Checks if the app pair is launchable at the current screen size. */
-    fun isLaunchable(context: Context) =
-        (ActivityContext.lookupContext(context) as ActivityContext).getDeviceProfile().isTablet ||
-            getAppContents().stream().noneMatch {
-                it.hasStatusFlag(WorkspaceItemInfo.FLAG_NON_RESIZEABLE)
-            }
+    /** Checks if member apps are launchable at the current screen size. */
+    fun isLaunchable(context: Context): Pair<Boolean, Boolean> {
+        val isTablet =
+            (ActivityContext.lookupContext(context) as ActivityContext).getDeviceProfile().isTablet
+        return Pair(
+            isTablet || !getFirstApp().hasStatusFlag(WorkspaceItemInfo.FLAG_NON_RESIZEABLE),
+            isTablet || !getSecondApp().hasStatusFlag(WorkspaceItemInfo.FLAG_NON_RESIZEABLE)
+        )
+    }
+
+    /** Fetches high-res icons for member apps if needed. */
+    fun fetchHiResIconsIfNeeded(iconCache: IconCache) {
+        getAppContents().stream().filter(ItemInfoWithIcon::usingLowResIcon).forEach { member ->
+            iconCache.getTitleAndIcon(member, false)
+        }
+    }
+
+    /**
+     * App pairs will report itself as "disabled" (for accessibility) if either of the following is
+     * true:
+     * 1) One of the member WorkspaceItemInfos is disabled (i.e. the app software itself is paused
+     *    or can't be launched for some other reason).
+     * 2) One of the member apps can't be launched due to screen size requirements.
+     */
+    fun shouldReportDisabled(context: Context): Boolean {
+        return isDisabled || !isLaunchable(context).first || !isLaunchable(context).second
+    }
+
+    /** Generates a default title for the app pair and sets it. */
+    fun generateTitle(context: Context): CharSequence? {
+        val app1: CharSequence? = getFirstApp().title
+        val app2: CharSequence? = getSecondApp().title
+        title = context.getString(R.string.app_pair_default_title, app1, app2)
+        return title
+    }
 
     /** Generates an ItemInfo for logging. */
     override fun buildProto(cInfo: CollectionInfo?): LauncherAtom.ItemInfo {
@@ -83,12 +113,5 @@ class AppPairInfo() : CollectionInfo() {
             .setRank(rank)
             .setContainerInfo(getContainerInfo())
             .build()
-    }
-
-    /** Fetches high-res icons for member apps if needed. */
-    fun fetchHiResIconsIfNeeded(iconCache: IconCache) {
-        getAppContents().stream().filter(ItemInfoWithIcon::usingLowResIcon).forEach { member ->
-            iconCache.getTitleAndIcon(member, false)
-        }
     }
 }
