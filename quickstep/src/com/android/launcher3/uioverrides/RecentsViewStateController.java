@@ -21,7 +21,6 @@ import static com.android.launcher3.LauncherState.OVERVIEW;
 import static com.android.launcher3.LauncherState.OVERVIEW_ACTIONS;
 import static com.android.launcher3.LauncherState.OVERVIEW_SPLIT_SELECT;
 import static com.android.launcher3.states.StateAnimationConfig.ANIM_OVERVIEW_ACTIONS_FADE;
-import static com.android.launcher3.util.MultiPropertyFactory.MULTI_PROPERTY_VALUE;
 import static com.android.quickstep.views.RecentsView.CONTENT_ALPHA;
 import static com.android.quickstep.views.RecentsView.FULLSCREEN_PROGRESS;
 import static com.android.quickstep.views.RecentsView.TASK_MODALNESS;
@@ -41,6 +40,7 @@ import androidx.annotation.NonNull;
 
 import com.android.launcher3.LauncherState;
 import com.android.launcher3.Utilities;
+import com.android.launcher3.anim.AnimatedFloat;
 import com.android.launcher3.anim.AnimatorListeners;
 import com.android.launcher3.anim.PendingAnimation;
 import com.android.launcher3.anim.PropertySetter;
@@ -50,6 +50,7 @@ import com.android.quickstep.util.AnimUtils;
 import com.android.quickstep.util.SplitAnimationTimings;
 import com.android.quickstep.views.ClearAllButton;
 import com.android.quickstep.views.LauncherRecentsView;
+import com.android.quickstep.views.OverviewActionsView;
 import com.android.quickstep.views.RecentsView;
 
 /**
@@ -168,7 +169,7 @@ public final class RecentsViewStateController extends
                 clearAllButtonAlpha, LINEAR);
         float overviewButtonAlpha = state.areElementsVisible(mLauncher, OVERVIEW_ACTIONS) ? 1 : 0;
         propertySetter.setFloat(mLauncher.getActionsView().getVisibilityAlpha(),
-                MULTI_PROPERTY_VALUE, overviewButtonAlpha, config.getInterpolator(
+                AnimatedFloat.VALUE, overviewButtonAlpha, config.getInterpolator(
                         ANIM_OVERVIEW_ACTIONS_FADE, LINEAR));
     }
 
