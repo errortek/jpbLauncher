@@ -275,48 +275,41 @@ class SplitAnimationController(val splitSelectStateController: SplitSelectStateC
     }
 
     /**
-     * Creates and returns a view to fade in at .4 animation progress and adds it to the provided
-     * [pendingAnimation]. Assumes that animation will be the final split placeholder launch anim.
-     *
-     * [secondPlaceholderEndingBounds] refers to the second placeholder view that gets added on
-     * screen, not the logical second app.
-     * For landscape it's the left app and for portrait the top one.
+     * Creates and returns a fullscreen scrim to fade in behind the split confirm animation, and
+     * adds it to the provided [pendingAnimation].
      */
-    fun addDividerPlaceholderViewToAnim(pendingAnimation: PendingAnimation,
-                                        launcher: StatefulActivity<*>,
-                                        secondPlaceholderEndingBounds: Rect,
-                                        context: Context) : View {
-        val mSplitDividerPlaceholderView = View(context)
+    fun addScrimBehindAnim(
+        pendingAnimation: PendingAnimation,
+        launcher: StatefulActivity<*>,
+        context: Context
+    ): View {
+        val scrim = View(context)
         val recentsView = launcher.getOverviewPanel<RecentsView<*, *>>()
         val dp : com.android.launcher3.DeviceProfile = launcher.getDeviceProfile()
         // Add it before/under the most recently added first floating taskView
         val firstAddedSplitViewIndex: Int = launcher.getDragLayer().indexOfChild(
                 recentsView.splitSelectController.firstFloatingTaskView)
-        launcher.getDragLayer().addView(mSplitDividerPlaceholderView, firstAddedSplitViewIndex)
-        val lp = mSplitDividerPlaceholderView.layoutParams as InsettableFrameLayout.LayoutParams
+        launcher.getDragLayer().addView(scrim, firstAddedSplitViewIndex)
+        // Make the scrim fullscreen
+        val lp = scrim.layoutParams as InsettableFrameLayout.LayoutParams
         lp.topMargin = 0
+        lp.height = dp.heightPx
+        lp.width = dp.widthPx
 
-        if (dp.isLeftRightSplit) {
-            lp.height = secondPlaceholderEndingBounds.height()
-            lp.width = launcher.resources
-                    .getDimensionPixelSize(R.dimen.split_divider_handle_region_height)
-            mSplitDividerPlaceholderView.translationX = secondPlaceholderEndingBounds.right - lp.width / 2f
-            mSplitDividerPlaceholderView.translationY = 0f
-        } else {
-            lp.height = launcher.resources
-                    .getDimensionPixelSize(R.dimen.split_divider_handle_region_height)
-            lp.width = secondPlaceholderEndingBounds.width()
-            mSplitDividerPlaceholderView.translationY = secondPlaceholderEndingBounds.top - lp.height / 2f
-            mSplitDividerPlaceholderView.translationX = 0f
-        }
+        scrim.alpha = 0f
+        scrim.setBackgroundColor(launcher.resources.getColor(R.color.taskbar_background_dark))
+        val timings = AnimUtils.getDeviceSplitToConfirmTimings(dp.isTablet) as SplitToConfirmTimings
+        pendingAnimation.setViewAlpha(
+            scrim,
+            1f,
+            Interpolators.clampToProgress(
+                timings.backingScrimFadeInterpolator,
+                timings.backingScrimFadeInStartOffset,
+                timings.backingScrimFadeInEndOffset
+            )
+        )
 
-        mSplitDividerPlaceholderView.alpha = 0f
-        mSplitDividerPlaceholderView.setBackgroundColor(launcher.resources
-                .getColor(R.color.taskbar_background_dark))
-        val timings = AnimUtils.getDeviceSplitToConfirmTimings(dp.isTablet)
-        pendingAnimation.setViewAlpha(mSplitDividerPlaceholderView, 1f,
-                Interpolators.clampToProgress(timings.stagedRectScaleXInterpolator, 0.4f, 1f))
-        return mSplitDividerPlaceholderView
+        return scrim
     }
 
     /** Does not play any animation if user is not currently in split selection state. */
