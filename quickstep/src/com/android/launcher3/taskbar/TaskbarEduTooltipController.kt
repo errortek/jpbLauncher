@@ -82,10 +82,13 @@ open class TaskbarEduTooltipController(context: Context) :
     open val shouldShowSearchEdu = false
     private val isTooltipEnabled: Boolean
         get() = !Utilities.isRunningInTestHarness() && !activityContext.isPhoneMode
+
     private val isOpen: Boolean
         get() = tooltip?.isOpen ?: false
+
     val isBeforeTooltipFeaturesStep: Boolean
         get() = isTooltipEnabled && tooltipStep <= TOOLTIP_STEP_FEATURES
+
     private lateinit var controllers: TaskbarControllers
 
     // Keep track of whether the user has seen the Search Edu
@@ -148,6 +151,7 @@ open class TaskbarEduTooltipController(context: Context) :
         tooltipStep = TOOLTIP_STEP_NONE
         inflateTooltip(R.layout.taskbar_edu_features)
         tooltip?.run {
+            allowTouchDismissal = false
             val splitscreenAnim = requireViewById<LottieAnimationView>(R.id.splitscreen_animation)
             val suggestionsAnim = requireViewById<LottieAnimationView>(R.id.suggestions_animation)
             val pinningAnim = requireViewById<LottieAnimationView>(R.id.pinning_animation)
@@ -212,6 +216,7 @@ open class TaskbarEduTooltipController(context: Context) :
         inflateTooltip(R.layout.taskbar_edu_pinning)
 
         tooltip?.run {
+            allowTouchDismissal = true
             requireViewById<LottieAnimationView>(R.id.standalone_pinning_animation)
                 .supportLightTheme()
 
@@ -256,6 +261,7 @@ open class TaskbarEduTooltipController(context: Context) :
         userHasSeenSearchEdu = true
         inflateTooltip(R.layout.taskbar_edu_search)
         tooltip?.run {
+            allowTouchDismissal = true
             requireViewById<LottieAnimationView>(R.id.search_edu_animation).supportLightTheme()
             val eduSubtitle: TextView = requireViewById(R.id.search_edu_text)
             showDisclosureText(eduSubtitle)
@@ -328,7 +334,9 @@ open class TaskbarEduTooltipController(context: Context) :
     }
 
     /** Closes the current [tooltip]. */
-    fun hide() = tooltip?.close(true)
+    fun hide() {
+        tooltip?.close(true)
+    }
 
     /** Initializes [tooltip] with content from [contentResId]. */
     private fun inflateTooltip(@LayoutRes contentResId: Int) {
