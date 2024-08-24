@@ -14,7 +14,7 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-<!-- Should be the same as in packages/apps/Launcher3/res/color-night-v31/taskbar_background.xml -->
+<!-- Should be the same as in packages/apps/jpb Launcher/res/color-night-v31/taskbar_background.xml -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <!--  Want to use @android:color/system_neutral1_500, but that causes build errors  -->
     <item android:color="#76777D" android:lStar="6" />
