@@ -17,7 +17,7 @@
 <com.android.quickstep.views.ClearAllButton
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    style="@style/OverviewClearAllButton"
+    style="@style/OverviewActionButton"
     android:id="@+id/clear_all"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
