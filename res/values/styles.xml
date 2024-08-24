@@ -19,7 +19,7 @@
 
 <resources>
     <!-- Launcher theme -->
-    <style name="BaseLauncherTheme" parent="@android:style/Theme.DeviceDefault.Light">
+    <style name="BaseLauncherTheme" parent="@style/Theme.Material3.Light">
         <item name="disabledIconAlpha">.54</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:colorEdgeEffect">#FF757575</item>
@@ -76,7 +76,6 @@
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
         <item name="android:statusBarColor">#00000000</item>
         <item name="android:navigationBarColor">#00000000</item>
-        <item name="android:switchStyle">@style/SwitchStyle</item>
 
         <item name="materialColorOnSecondaryFixedVariant">@color/material_color_on_secondary_fixed_variant</item>
         <item name="materialColorOnTertiaryFixedVariant">@color/material_color_on_tertiary_fixed_variant</item>
@@ -122,13 +121,6 @@
         <item name="materialColorPrimary">@color/material_color_primary</item>
         <item name="materialColorSecondary">@color/material_color_secondary</item>
         <item name="materialColorTertiary">@color/material_color_tertiary</item>
-    </style>
-
-    <style name="SwitchStyle"
-        parent="@android:style/Widget.Material.CompoundButton.Switch">
-        <item name="android:switchMinWidth">52dp</item>
-        <item name="android:thumb">@drawable/home_settings_switch_thumb</item>
-        <item name="android:track">@drawable/home_settings_switch_track</item>
     </style>
 
     <style name="LauncherTheme.DarkMainColor" parent="@style/LauncherTheme" />
@@ -386,22 +378,22 @@
 
     <style name="TextTitle" parent="@android:style/TextAppearance.DeviceDefault" />
 
-    <style name="Button.TopRounded.Bordered" parent="@android:style/Widget.Material.Button">
+    <style name="Button.TopRounded.Bordered" parent="@style/Widget.Material3.Button">
         <item name="android:background">@drawable/button_top_rounded_bordered_ripple</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
 
-    <style name="Button.BottomRounded.Colored" parent="@android:style/Widget.Material.Button">
+    <style name="Button.BottomRounded.Colored" parent="@style/Widget.Material3.Button">
         <item name="android:background">@drawable/button_bottom_rounded_colored_ripple</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
 
-    <style name="Button.Rounded.Colored" parent="@android:style/Widget.Material.Button">
+    <style name="Button.Rounded.Colored" parent="@style/Widget.Material3.Button">
         <item name="android:background">@drawable/button_rounded_colored_ripple</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
 
-    <style name="Button.FullRounded.Colored" parent="@android:style/Widget.Material.Button">
+    <style name="Button.FullRounded.Colored" parent="@style/Widget.Material3.Button">
         <item name="android:background">@drawable/full_rounded_colored_ripple</item>
         <item name="android:stateListAnimator">@null</item>
     </style>
