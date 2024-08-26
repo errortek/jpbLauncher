@@ -21,7 +21,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
      xmlns:tools="http://schemas.android.com/tools"
      package="com.android.launcher3"
-    android:versionName="3.00.01.0001-BETA"
+    android:versionName="4.00.01.0001-DEV"
     android:versionCode="1">
 
     <uses-permission android:name="android.permission.BROADCAST_CLOSE_SYSTEM_DIALOGS" />
