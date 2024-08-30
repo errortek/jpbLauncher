@@ -94,7 +94,7 @@ filegroup {
 android_library {
     name: "launcher-aosp-tapl",
     libs: [
-        "framework-statsd",
+        "framework-statsd.stubs.module_lib",
     ],
     static_libs: [
         "androidx.annotation_annotation",
@@ -269,7 +269,7 @@ android_library {
         "quickstep/res",
     ],
     libs: [
-        "framework-statsd",
+        "framework-statsd.stubs.module_lib",
     ],
     static_libs: [
         "Launcher3ResLib",
@@ -326,7 +326,7 @@ android_library {
     ],
     resource_dirs: [],
     libs: [
-        "framework-statsd",
+        "framework-statsd.stubs.module_lib",
     ],
     // Note the ordering here is important when it comes to resource
     // overriding. We want the most specific resource overrides defined
