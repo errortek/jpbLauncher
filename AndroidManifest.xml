@@ -20,8 +20,8 @@
 <manifest
     xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.launcher3"
-    android:versionName="3.00.01.0001-BETA"
-    android:versionCode="1">
+    android:versionName="4.00.02.0015-BETA"
+    android:versionCode="15">
     <uses-sdk android:targetSdkVersion="33" android:minSdkVersion="30"/>
     <!--
     Manifest entries specific to Launcher3. This is merged with AndroidManifest-common.xml.
